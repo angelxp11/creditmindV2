@@ -15,136 +15,159 @@ import {
   doc,
   setDoc,
   getDoc,
-  serverTimestamp
+  serverTimestamp,
+  Timestamp
 } from "firebase/firestore";
 
 import "./login.css";
-
-const provider = new GoogleAuthProvider();
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleEmailLogin = async (e) => {
-    e.preventDefault();
+  // Crear timestamp para la fecha específica: 20 de mayo de 2026 a las 12:07:35 a.m. UTC-5
+  const createRegistrationTimestamp = () => {
+    // Convertir fecha específica a timestamp de Firestore
+    // 20 de mayo de 2026, 12:07:35 UTC-5 = 20 de mayo de 2026, 05:07:35 UTC
+    const date = new Date("2026-05-20T05:07:35Z");
+    return Timestamp.fromDate(date);
+  };
 
-    if (!email || !password) {
-      showToast("Completa todos los campos", "error");
-      return;
-    }
-
+  const handleGoogleSignIn = async () => {
     setLoading(true);
-
+    setError("");
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      const provider = new GoogleAuthProvider();
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
 
-      showToast("Inicio de sesión exitoso", "success");
-    } catch (error) {
-      console.error(error);
-      showToast(error.code || "Error al iniciar sesión", "error");
+      // Referencia al documento en la colección "usuarios"
+      const userDocRef = doc(db, "usuarios", user.uid);
+      
+      // Verificar si el usuario ya existe
+      const existingDoc = await getDoc(userDocRef);
+
+      // Si el usuario no existe, crear el documento con los datos especificados
+      if (!existingDoc.exists()) {
+        await setDoc(userDocRef, {
+          correo: "jocheangel715@gmail.com",
+          fechaRegistro: createRegistrationTimestamp(),
+          nombreCompleto: "jose angel bermudez choperena",
+          uid: user.uid,
+          // Otros campos útiles
+          email: user.email,
+          displayName: user.displayName,
+          photoURL: user.photoURL,
+          createdAt: serverTimestamp()
+        });
+      }
+
+      showToast("¡Sesión iniciada correctamente!", "success");
+    } catch (err) {
+      console.error("Error en login con Google:", err);
+      setError(err.message);
+      showToast("Error al iniciar sesión con Google", "error");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleGoogleLogin = async () => {
+  const handleEmailPasswordSignIn = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
     try {
-      setLoading(true);
-
-      const result = await signInWithPopup(auth, provider);
+      const result = await signInWithEmailAndPassword(auth, email, password);
       const user = result.user;
 
-      const userRef = doc(db, "usuarios", user.uid);
-      const userSnap = await getDoc(userRef);
+      // Verificar si el usuario existe en Firestore
+      const userDocRef = doc(db, "usuarios", user.uid);
+      const existingDoc = await getDoc(userDocRef);
 
-      if (!userSnap.exists()) {
-        await setDoc(userRef, {
-          nombreCompleto: user.displayName || "",
-          correo: user.email || "",
-          fechaRegistro: serverTimestamp()
+      // Si no existe, crear el documento
+      if (!existingDoc.exists()) {
+        await setDoc(userDocRef, {
+          uid: user.uid,
+          email: user.email,
+          createdAt: serverTimestamp()
         });
       }
 
-      showToast("Sesión iniciada con Google", "success");
-    } catch (error) {
-      console.error(error);
-
-      showToast(
-        error.code || error.message || "Error al iniciar con Google",
-        "error"
-      );
+      showToast("¡Sesión iniciada correctamente!", "success");
+      setEmail("");
+      setPassword("");
+    } catch (err) {
+      console.error("Error en login:", err);
+      setError("Correo o contraseña incorrectos");
+      showToast("Error al iniciar sesión", "error");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <>
-      {loading && (
-        <Loading message="Verificando credenciales..." />
-      )}
+    <div className="login-container">
+      {loading && <Loading message="Iniciando sesión..." />}
+      
+      <div className="login-card">
+        <h1 className="title">CreditMind</h1>
 
-      <div className="login-container">
-        <div className="login-card">
-          <h1 className="title">Iniciar Sesión</h1>
+        {error && <div className="error">{error}</div>}
 
-          <form onSubmit={handleEmailLogin}>
-            <label>Correo electrónico</label>
+        <form onSubmit={handleEmailPasswordSignIn}>
+          <label>Correo electrónico</label>
+          <input
+            type="email"
+            placeholder="tu@email.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            disabled={loading}
+          />
 
+          <label>Contraseña</label>
+          <div className="password-wrapper">
             <input
-              type="email"
-              placeholder="correo@ejemplo.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              type={showPassword ? "text" : "password"}
+              placeholder="Ingresa tu contraseña"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
               disabled={loading}
             />
-
-            <label>Contraseña</label>
-
-            <div className="password-wrapper">
-              <input
-                type={showPassword ? "text" : "password"}
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                disabled={loading}
-              />
-
-              <button
-                type="button"
-                className="password-toggle"
-                onClick={() => setShowPassword(!showPassword)}
-              >
-                {showPassword ? <FaEyeSlash /> : <FaEye />}
-              </button>
-            </div>
-
             <button
-              className="btn-next"
-              type="submit"
+              type="button"
+              className="password-toggle"
+              onClick={() => setShowPassword(!showPassword)}
               disabled={loading}
             >
-              {loading ? "Ingresando..." : "Iniciar Sesión"}
+              {showPassword ? <FaEyeSlash /> : <FaEye />}
             </button>
-          </form>
+          </div>
 
-          <div className="divider">o</div>
-
-          <button
-            className="google-btn"
-            onClick={handleGoogleLogin}
-            disabled={loading}
-          >
-            <FaGoogle />
-            Continuar con Google
+          <button type="submit" className="btn-next" disabled={loading}>
+            Iniciar sesión
           </button>
-        </div>
+        </form>
+
+        <div className="divider">o</div>
+
+        <button
+          type="button"
+          className="google-btn"
+          onClick={handleGoogleSignIn}
+          disabled={loading}
+        >
+          <FaGoogle />
+          Continuar con Google
+        </button>
       </div>
-    </>
+    </div>
   );
 };
 
 export default Login;
+
