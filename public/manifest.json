@@ -1,11 +1,12 @@
 {
-  "short_name": "CreditMind",
-  "name": "CreditMind - Finanzas Inteligentes",
-  "description": "Gestiona tus finanzas, controla gastos, analiza ingresos y toma mejores decisiones financieras.",
+  "short_name": "creditmind creditmind",
+  "name": "creditmind",
+  "description": "ccreditmind.",
+
   "icons": [
     {
       "src": "favicon.ico",
-      "sizes": "64x64 32x32 24x24 16x16",
+      "sizes": "16x16 24x24 32x32 64x64",
       "type": "image/x-icon"
     },
     {
@@ -21,15 +22,23 @@
       "purpose": "any maskable"
     }
   ],
-  "start_url": "/creditmindv2/",
-"scope": "/creditmindv2/" ,
+
+  "start_url": ".",
+  "scope": ".",
+
   "display": "standalone",
   "orientation": "portrait",
-  "theme_color": "#06b6d4",
-  "background_color": "#0f172a",
+
+  "theme_color": "#0f172a",
+  "background_color": "#0b1120",
+
+  "lang": "es",
+  "dir": "ltr",
+
   "categories": [
-    "finance",
-    "business",
-    "productivity"
+    "sports",
+    "games",
+    "entertainment",
+    "utilities"
   ]
 }
