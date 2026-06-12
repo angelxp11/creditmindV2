@@ -1,5 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { onAuthStateChanged, signOut } from "firebase/auth";
+import {
+  onAuthStateChanged,
+  signOut,
+  getRedirectResult
+} from "firebase/auth";
 
 import { auth } from "./server/api";
 
@@ -21,8 +25,6 @@ function App() {
   const [user, setUser] = useState(null);
   const [checkingAuth, setCheckingAuth] = useState(true);
 
-  const [authDebug, setAuthDebug] = useState("Verificando...");
-
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [showCuentas, setShowCuentas] = useState(false);
   const [showDeudas, setShowDeudas] = useState(false);
@@ -36,14 +38,22 @@ function App() {
   });
 
   useEffect(() => {
+    const checkRedirect = async () => {
+      try {
+        const result = await getRedirectResult(auth);
+
+        if (result?.user) {
+          console.log("Usuario autenticado por redirect:", result.user);
+        }
+      } catch (error) {
+        console.error("Error getRedirectResult:", error);
+      }
+    };
+
+    checkRedirect();
+
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       console.log("Firebase User:", currentUser);
-
-      if (currentUser) {
-        setAuthDebug(`LOGUEADO: ${currentUser.email}`);
-      } else {
-        setAuthDebug("SIN SESION");
-      }
 
       setUser(currentUser);
       setCheckingAuth(false);
@@ -65,7 +75,6 @@ function App() {
     return (
       <>
         <ToastContainer />
-
         <Loading message="Verificando sesión..." />
       </>
     );
