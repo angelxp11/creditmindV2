@@ -1,34 +1,58 @@
 import React, { useState } from "react";
-import "./login.css";
+import {
+  signInWithEmailAndPassword,
+  signInWithPopup,
+  GoogleAuthProvider
+} from "firebase/auth";
 
-import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { FaGoogle, FaEye, FaEyeSlash } from "react-icons/fa";
+
+import { auth, db } from "../../server/api";
+import { showToast } from "../../resources/toastcontainer/ToastContainer";
+import Loading from "../../resources/loading/loading";
+
 import {
   doc,
   setDoc,
-  serverTimestamp,
   getDoc,
+  serverTimestamp
 } from "firebase/firestore";
 
-import { auth, db } from "../../server/api";
-import Carga from "../../resources/carga/carga";
-import { showToast } from "../../resources/toast/ToastContainer";
+import "./login.css";
 
 const provider = new GoogleAuthProvider();
 
 const Login = () => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const loginGoogle = async () => {
+  const handleEmailLogin = async (e) => {
+    e.preventDefault();
+
+    if (!email || !password) {
+      showToast("Completa todos los campos", "error");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+
+      showToast("Inicio de sesión exitoso", "success");
+    } catch (error) {
+      console.error(error);
+      showToast(error.code || "Error al iniciar sesión", "error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
     try {
       setLoading(true);
-
-      if (typeof window !== "undefined") {
-        window.dispatchEvent(
-          new CustomEvent("wc-loader", {
-            detail: { visible: true },
-          })
-        );
-      }
 
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
@@ -36,75 +60,85 @@ const Login = () => {
       const userRef = doc(db, "usuarios", user.uid);
       const userSnap = await getDoc(userRef);
 
-      // Separar nombre y apellido
-      const fullName = user.displayName || "";
-      const nameParts = fullName.split(" ");
-
-      const nombre = nameParts[0] || "";
-      const apellido = nameParts.slice(1).join(" ") || "";
-
-      const data = {
-        uid: user.uid,
-        nombre,
-        apellido,
-        rol: "usuario",
-        email: user.email || "",
-        fotoURL: user.photoURL || "",
-      };
-
-      // Solo crear fechaRegistro si el usuario no existe
       if (!userSnap.exists()) {
-        data.fechaRegistro = serverTimestamp();
+        await setDoc(userRef, {
+          nombreCompleto: user.displayName || "",
+          correo: user.email || "",
+          fechaRegistro: serverTimestamp()
+        });
       }
 
-      await setDoc(userRef, data, { merge: true });
-
-      setLoading(false);
-
-      if (typeof window !== "undefined") {
-        window.dispatchEvent(
-          new CustomEvent("wc-loader", {
-            detail: { visible: false },
-          })
-        );
-      }
+      showToast("Sesión iniciada con Google", "success");
     } catch (error) {
       console.error(error);
 
-      showToast("Error al iniciar sesión", "error");
-
+      showToast(
+        error.code || error.message || "Error al iniciar con Google",
+        "error"
+      );
+    } finally {
       setLoading(false);
-
-      if (typeof window !== "undefined") {
-        window.dispatchEvent(
-          new CustomEvent("wc-loader", {
-            detail: { visible: false },
-          })
-        );
-      }
     }
   };
 
   return (
     <>
-      <Carga visible={loading} />
+      {loading && (
+        <Loading message="Verificando credenciales..." />
+      )}
 
       <div className="login-container">
         <div className="login-card">
-          <h1>World Cup Album</h1>
+          <h1 className="title">Iniciar Sesión</h1>
 
-          <p>Inicia sesión con Google</p>
+          <form onSubmit={handleEmailLogin}>
+            <label>Correo electrónico</label>
+
+            <input
+              type="email"
+              placeholder="correo@ejemplo.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              disabled={loading}
+            />
+
+            <label>Contraseña</label>
+
+            <div className="password-wrapper">
+              <input
+                type={showPassword ? "text" : "password"}
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                disabled={loading}
+              />
+
+              <button
+                type="button"
+                className="password-toggle"
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? <FaEyeSlash /> : <FaEye />}
+              </button>
+            </div>
+
+            <button
+              className="btn-next"
+              type="submit"
+              disabled={loading}
+            >
+              {loading ? "Ingresando..." : "Iniciar Sesión"}
+            </button>
+          </form>
+
+          <div className="divider">o</div>
 
           <button
             className="google-btn"
-            onClick={loginGoogle}
+            onClick={handleGoogleLogin}
             disabled={loading}
-            aria-busy={loading}
           >
-            <img
-              src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/google/google-original.svg"
-              alt="Google"
-            />
+            <FaGoogle />
             Continuar con Google
           </button>
         </div>

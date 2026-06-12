@@ -1,64 +1,33 @@
-:root {
+body.dark-theme {
+  /* ===== FONDOS ===== */
+  --bg-primary: #020617;
+  --bg-secondary: #0f172a;
+  --bg-card: #1e293b;
+  --bg-hover: #334155;
 
-  /* ================= BACKGROUNDS ================= */
+  /* ===== TEXTOS ===== */
+  --text-title: #f8fafc;
+  --text-primary: #e2e8f0;
+  --text-label: #cbd5e1;
+  --text-muted: #94a3b8;
 
-  --bg-primary: #0f172a;
-  --bg-secondary: #1e293b;
-  --bg-cards: rgba(255, 255, 255, 0.08);
-  --bg-card-solid: #1e293b;
-  --bg-input: rgba(255,255,255,0.06);
+  /* ===== BORDES ===== */
+  --border-color: #334155;
 
-  /* ================= TEXT ================= */
+  /* ===== BOTÓN PRINCIPAL */
+  --btn-primary-bg: #06b6d4;
+  --btn-primary-hover: #0891b2;
+  --btn-primary-text: #ffffff;
 
-  --text-primary: #ffffff;
-  --text-secondary: rgba(255,255,255,0.75);
-  --text-muted: rgba(255,255,255,0.5);
-  --text-dark: #111827;
+  /* ===== BOTÓN BLOQUEADO */
+  --btn-disabled-bg: #1e293b;
+  --btn-disabled-text: #64748b;
+  --btn-disabled-border: #334155;
 
-  /* ================= BRAND ================= */
-
-  --primary: #3b82f6;
-  --primary-hover: #2563eb;
-
-  --secondary: #06b6d4;
-  --secondary-hover: #0891b2;
-
-  /* ================= STATUS ================= */
-
-  --success: #22c55e;
-  --warning: #f59e0b;
+  /* ===== ALERTAS ===== */
   --danger: #ef4444;
+  --success: #22c55e;
 
-  /* ================= BORDERS ================= */
-
-  --border-color: rgba(255,255,255,0.1);
-  --border-strong: rgba(255,255,255,0.2);
-
-  /* ================= SHADOWS ================= */
-
-  --shadow-sm: 0 2px 8px rgba(0,0,0,0.15);
-  --shadow-md: 0 8px 20px rgba(0,0,0,0.25);
-  --shadow-lg: 0 15px 40px rgba(0,0,0,0.35);
-
-  /* ================= BUTTONS ================= */
-
-  --button-bg: #ffffff;
-  --button-text: #111827;
-
-  --button-secondary-bg: rgba(255,255,255,0.08);
-  --button-secondary-text: #ffffff;
-
-  /* ================= INPUTS ================= */
-
-  --input-bg: rgba(255,255,255,0.05);
-  --input-border: rgba(255,255,255,0.12);
-  --input-focus: #3b82f6;
-
-  /* ================= OVERLAY ================= */
-
-  --overlay: rgba(0,0,0,0.55);
-
-  /* ================= TRANSITIONS ================= */
-
-  --transition: 0.3s ease;
+  /* ===== EXTRA */
+  --accent-color: #06b6d4;
 }

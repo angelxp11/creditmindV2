@@ -1,260 +1,207 @@
 import React, { useEffect, useState } from "react";
-import { onAuthStateChanged } from "firebase/auth";
-import {
-  doc,
-  getDoc,
-  collection,
-  query,
-  where,
-  onSnapshot,
-  getDocs,
-} from "firebase/firestore";
+import { onAuthStateChanged, signOut } from "firebase/auth";
 
-import { auth, db } from "./server/api";
+import { auth } from "./server/api";
 
-import Login from "./Components/login/login";
+import Login from "./components/login/login";
+import Home from "./components/home/home";
+import PQR from "./components/pqr/pqr";
+import Cuentas from "./components/cuentas/cuentas";
+import Deudas from "./components/deudas/deudas";
+import Movimientos from "./components/movimientos/movimientos";
+import VerMovimientos from "./components/movimientos/vermovimientos/vermovimientos";
+import Ingresos from "./components/movimientos/ingresos/ingresos";
+
+import Loading from "./resources/loading/loading";
+import ToastContainer from "./resources/toastcontainer/ToastContainer";
 import Navbar from "./resources/navbar/navbar";
-import Home from "./Components/home/home";
-import Footer from "./resources/footer/footer";
-import Cargar from "./Components/adminalbum/cargar";
-import AdquirirAlbum from "./Components/adminalbum/adquiriralbum/adquiriralbum";
-import CargarLaminas from "./Components/adminalbum/cargarlaminas";
-import Contenido from "./Components/home/contenido/contenido";
-import Amigos from "./amigos/amigos";
-
-import Carga from "./resources/carga/carga";
-import ToastContainer from "./resources/toast/ToastContainer";
-
-import "./App.css";
+import ConfirmModal from "./resources/modalquestion/modalquestion";
 
 function App() {
   const [user, setUser] = useState(null);
+  const [checkingAuth, setCheckingAuth] = useState(true);
 
-  const [loading, setLoading] = useState(true);
-  const [actionLoading, setActionLoading] = useState(false);
+  const [authDebug, setAuthDebug] = useState("Verificando...");
 
-  const [albums, setAlbums] = useState([]);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [showCuentas, setShowCuentas] = useState(false);
+  const [showDeudas, setShowDeudas] = useState(false);
+  const [showMovimientos, setShowMovimientos] = useState(false);
+  const [showVerMovimientos, setShowVerMovimientos] = useState(false);
+  const [showIngresos, setShowIngresos] = useState(false);
 
-  const [cargarModalOpen, setCargarModalOpen] = useState(false);
-  const [adquirirModalOpen, setAdquirirModalOpen] = useState(false);
-  const [cargarLaminasOpen, setCargarLaminasOpen] = useState(false);
+  const [modalData, setModalData] = useState({
+    title: "",
+    question: "",
+  });
 
-  const [selectedAlbum, setSelectedAlbum] = useState(null);
-  const [amigosView, setAmigosView] = useState(false);
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      console.log("Firebase User:", currentUser);
 
-  // ================= RECARGAR ÁLBUMES =================
-  const fetchAlbums = async (uid) => {
+      if (currentUser) {
+        setAuthDebug(`LOGUEADO: ${currentUser.email}`);
+      } else {
+        setAuthDebug("SIN SESION");
+      }
+
+      setUser(currentUser);
+      setCheckingAuth(false);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  const handleLogout = async () => {
     try {
-      const albumsQuery = query(
-        collection(db, "album_usuario"),
-        where("idUsuario", "==", uid)
-      );
-
-      const albumsSnap = await getDocs(albumsQuery);
-
-      setAlbums(
-        albumsSnap.docs.map((docu) => ({
-          id: docu.id,
-          ...docu.data(),
-        }))
-      );
-    } catch (err) {
-      console.error("Error recargando álbumes:", err);
+      await signOut(auth);
+      setShowLogoutModal(false);
+    } catch (error) {
+      console.error("Error al cerrar sesión:", error);
     }
   };
 
-  // ================= AUTH =================
-  useEffect(() => {
-    let unsubscribeAlbums = null;
+  if (checkingAuth) {
+    return (
+      <>
+        <ToastContainer />
 
-    const unsubscribeAuth = onAuthStateChanged(
-      auth,
-      async (currentUser) => {
-        try {
-          if (currentUser) {
-            // ================= USER DATA =================
-            const userDocRef = doc(db, "usuarios", currentUser.uid);
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100%",
+            background: "red",
+            color: "white",
+            padding: "8px",
+            zIndex: 99999,
+            fontSize: "12px",
+          }}
+        >
+          {authDebug}
+        </div>
 
-            const userDocSnap = await getDoc(userDocRef);
-
-            if (userDocSnap.exists()) {
-              const userData = userDocSnap.data();
-
-              setUser({
-                ...currentUser,
-                rol: userData.rol || "usuario",
-              });
-            } else {
-              setUser(currentUser);
-            }
-
-            // ================= REALTIME ÁLBUMES =================
-            try {
-              const albumsQuery = query(
-                collection(db, "album_usuario"),
-                where("idUsuario", "==", currentUser.uid)
-              );
-
-              unsubscribeAlbums = onSnapshot(
-                albumsQuery,
-                (snapshot) => {
-                  setAlbums(
-                    snapshot.docs.map((docu) => ({
-                      id: docu.id,
-                      ...docu.data(),
-                    }))
-                  );
-                },
-                (err) => {
-                  console.error(
-                    "Error realtime álbumes:",
-                    err
-                  );
-
-                  setAlbums([]);
-                }
-              );
-            } catch (err) {
-              console.error(
-                "Error iniciando realtime álbumes:",
-                err
-              );
-
-              setAlbums([]);
-            }
-          } else {
-            setUser(null);
-            setAlbums([]);
-
-            if (unsubscribeAlbums) {
-              unsubscribeAlbums();
-              unsubscribeAlbums = null;
-            }
-          }
-        } finally {
-          setLoading(false);
-        }
-      }
+        <Loading message="Verificando sesión..." />
+      </>
     );
+  }
 
-    return () => {
-      unsubscribeAuth();
-
-      if (unsubscribeAlbums) {
-        unsubscribeAlbums();
-      }
-    };
-  }, []);
-
-  // ================= LOADER GLOBAL =================
-  useEffect(() => {
-    const handleLoaderEvent = (event) => {
-      const visible = event?.detail?.visible;
-
-      if (typeof visible === "boolean") {
-        setActionLoading(visible);
-      }
-    };
-
-    window.addEventListener(
-      "wc-loader",
-      handleLoaderEvent
-    );
-
-    return () => {
-      window.removeEventListener(
-        "wc-loader",
-        handleLoaderEvent
-      );
-    };
-  }, []);
-
-  // ================= RENDER =================
   return (
     <>
-      {/* TOAST */}
       <ToastContainer />
 
-      {/* LOADER */}
-      <Carga visible={loading || actionLoading} />
+      <div
+        style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          width: "100%",
+          background: "red",
+          color: "white",
+          padding: "8px",
+          zIndex: 99999,
+          fontSize: "12px",
+        }}
+      >
+        {authDebug}
+      </div>
 
-      {/* LOGIN */}
-      {!loading && !user && <Login />}
-
-      {/* APP */}
-      {!loading && user && (
-        <div className="app-container">
+      {user ? (
+        <>
           <Navbar
-            user={user}
-            onOpenCargar={() =>
-              setCargarModalOpen(true)
-            }
-            onOpenAdquirir={() =>
-              setAdquirirModalOpen(true)
-            }
-            onOpenCargarLaminas={() =>
-              setCargarLaminasOpen(true)
-            }
-            onOpenAmigos={() =>
-              setAmigosView(true)
-            }
+            onLogout={(data) => {
+              setModalData(data);
+              setShowLogoutModal(true);
+            }}
+            onOpenCuentas={() => {
+              setShowCuentas(true);
+              setShowDeudas(false);
+              setShowMovimientos(false);
+              setShowVerMovimientos(false);
+              setShowIngresos(false);
+            }}
+            onOpenDeudas={() => {
+              setShowDeudas(true);
+              setShowCuentas(false);
+              setShowMovimientos(false);
+              setShowVerMovimientos(false);
+              setShowIngresos(false);
+            }}
+            onOpenMovimientos={() => {
+              setShowMovimientos(true);
+              setShowCuentas(false);
+              setShowDeudas(false);
+              setShowVerMovimientos(false);
+              setShowIngresos(false);
+            }}
+            onOpenIngresos={() => {
+              setShowIngresos(true);
+              setShowCuentas(false);
+              setShowDeudas(false);
+              setShowMovimientos(false);
+              setShowVerMovimientos(false);
+            }}
+            onOpenVerMovimientos={() => {
+              setShowVerMovimientos(true);
+              setShowCuentas(false);
+              setShowDeudas(false);
+              setShowMovimientos(false);
+              setShowIngresos(false);
+            }}
+            onGoHome={() => {
+              setShowCuentas(false);
+              setShowDeudas(false);
+              setShowMovimientos(false);
+              setShowVerMovimientos(false);
+              setShowIngresos(false);
+            }}
           />
 
-          {amigosView ? (
-            <Amigos
-              user={user}
-              albums={albums}
-              onBack={() => {
-                setAmigosView(false);
-                setSelectedAlbum(null);
-              }}
-            />
-          ) : selectedAlbum ? (
-            <Contenido
-              album={selectedAlbum}
-              onBack={() =>
-                setSelectedAlbum(null)
-              }
-            />
-          ) : (
-            <>
-              <Home
-                user={user}
-                albums={albums}
-                onSelectAlbum={setSelectedAlbum}
-              />
-
-              <Footer />
-            </>
-          )}
-
-          {/* MODAL CARGAR */}
-          <Cargar
-            isOpen={cargarModalOpen}
-            onClose={() =>
-              setCargarModalOpen(false)
-            }
+          <Cuentas
+            isOpen={showCuentas}
+            onClose={() => setShowCuentas(false)}
           />
 
-          {/* MODAL ADQUIRIR */}
-          <AdquirirAlbum
-            isOpen={adquirirModalOpen}
-            onClose={() =>
-              setAdquirirModalOpen(false)
-            }
-            onAlbumAcquired={() =>
-              fetchAlbums(user.uid)
-            }
+          <Deudas
+            isOpen={showDeudas}
+            onClose={() => setShowDeudas(false)}
           />
 
-          {/* MODAL CARGAR LÁMINAS */}
-          <CargarLaminas
-            isOpen={cargarLaminasOpen}
-            onClose={() =>
-              setCargarLaminasOpen(false)
-            }
+          <Movimientos
+            isOpen={showMovimientos}
+            onClose={() => setShowMovimientos(false)}
           />
-        </div>
+
+          <Ingresos
+            isOpen={showIngresos}
+            onClose={() => setShowIngresos(false)}
+          />
+
+          <VerMovimientos
+            isOpen={showVerMovimientos}
+            onClose={() => setShowVerMovimientos(false)}
+          />
+
+          {!showCuentas &&
+            !showDeudas &&
+            !showMovimientos &&
+            !showVerMovimientos && <Home />}
+
+          <PQR />
+
+          <ConfirmModal
+            isOpen={showLogoutModal}
+            title={modalData.title}
+            description={modalData.question}
+            confirmText="Cerrar sesión"
+            cancelText="Cancelar"
+            onConfirm={handleLogout}
+            onCancel={() => setShowLogoutModal(false)}
+          />
+        </>
+      ) : (
+        <Login />
       )}
     </>
   );

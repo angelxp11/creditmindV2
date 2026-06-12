@@ -1,3 +1,4 @@
+
 // Import Firebase core
 import { initializeApp } from "firebase/app";
 
@@ -12,13 +13,13 @@ import { getFirestore } from "firebase/firestore";
 
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDQJLnQLeXWyR4t4ZZXTnX4vue1yT0TpIg",
-  authDomain: "controllaminasfifa.firebaseapp.com",
-  projectId: "controllaminasfifa",
-  storageBucket: "controllaminasfifa.firebasestorage.app",
-  messagingSenderId: "69356050424",
-  appId: "1:69356050424:web:39d452214020f96c1a680d",
-  measurementId: "G-2DQSWWKNP1"
+  apiKey: "AIzaSyC2FhFI0sXYy-lAC_G42B6Dh6fVh6gfCm8",
+  authDomain: "creditmind-8ea8b.firebaseapp.com",
+  projectId: "creditmind-8ea8b",
+  storageBucket: "creditmind-8ea8b.firebasestorage.app",
+  messagingSenderId: "891749664306",
+  appId: "1:891749664306:web:2be791460e20429c0a9e2b",
+  measurementId: "G-ZTNJ75ZWYN"
 };
 
 
