@@ -1,156 +1,116 @@
 import React, { useState } from "react";
-import {
-  signInWithEmailAndPassword,
-  signInWithPopup,
-  GoogleAuthProvider
-} from "firebase/auth";
+import "./login.css";
 
-import { FaGoogle, FaEye, FaEyeSlash } from "react-icons/fa";
-
-import { auth, db } from "../../server/api";
-import { showToast } from "../../resources/toastcontainer/ToastContainer";
-import Loading from "../../resources/loading/loading";
-
+import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import {
   doc,
   setDoc,
-  getDoc,
   serverTimestamp,
-  Timestamp
+  getDoc,
 } from "firebase/firestore";
 
-import "./login.css";
+import { auth, db } from "../../server/api";
+import Carga from "../../resources/carga/carga";
+import { showToast } from "../../resources/toast/ToastContainer";
+
+const provider = new GoogleAuthProvider();
 
 const Login = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
 
-  // Crear timestamp para la fecha específica: 20 de mayo de 2026 a las 12:07:35 a.m. UTC-5
-  const createRegistrationTimestamp = () => {
-    // Convertir fecha específica a timestamp de Firestore
-    // 20 de mayo de 2026, 12:07:35 UTC-5 = 20 de mayo de 2026, 05:07:35 UTC
-    const date = new Date("2026-05-20T05:07:35Z");
-    return Timestamp.fromDate(date);
-  };
-
- const handleGoogleSignIn = async () => {
-  setLoading(true);
-  setError("");
-
-  try {
-    console.log("ANTES DEL POPUP");
-
-    const provider = new GoogleAuthProvider();
-
-    const result = await signInWithPopup(auth, provider);
-
-    console.log("LOGIN OK", result.user);
-    console.log("AUTH CURRENT", auth.currentUser);
-
-    showToast("¡Sesión iniciada correctamente!", "success");
-  } catch (err) {
-    console.error("ERROR GOOGLE", err);
-  } finally {
-    setLoading(false);
-  }
-};
-
-  const handleEmailPasswordSignIn = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError("");
+  const loginGoogle = async () => {
     try {
-      const result = await signInWithEmailAndPassword(auth, email, password);
-      const user = result.user;
+      setLoading(true);
 
-      // Verificar si el usuario existe en Firestore
-      const userDocRef = doc(db, "usuarios", user.uid);
-      const existingDoc = await getDoc(userDocRef);
-
-      // Si no existe, crear el documento
-      if (!existingDoc.exists()) {
-        await setDoc(userDocRef, {
-          uid: user.uid,
-          email: user.email,
-          createdAt: serverTimestamp()
-        });
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(
+          new CustomEvent("wc-loader", {
+            detail: { visible: true },
+          })
+        );
       }
 
-      showToast("¡Sesión iniciada correctamente!", "success");
-      setEmail("");
-      setPassword("");
-    } catch (err) {
-      console.error("Error en login:", err);
-      setError("Correo o contraseña incorrectos");
-      showToast("Error al iniciar sesión", "error");
-    } finally {
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+
+      const userRef = doc(db, "usuarios", user.uid);
+      const userSnap = await getDoc(userRef);
+
+      // Separar nombre y apellido
+      const fullName = user.displayName || "";
+      const nameParts = fullName.split(" ");
+
+      const nombre = nameParts[0] || "";
+      const apellido = nameParts.slice(1).join(" ") || "";
+
+      const data = {
+        uid: user.uid,
+        nombre,
+        apellido,
+        rol: "usuario",
+        email: user.email || "",
+        fotoURL: user.photoURL || "",
+      };
+
+      // Solo crear fechaRegistro si el usuario no existe
+      if (!userSnap.exists()) {
+        data.fechaRegistro = serverTimestamp();
+      }
+
+      await setDoc(userRef, data, { merge: true });
+
       setLoading(false);
+
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(
+          new CustomEvent("wc-loader", {
+            detail: { visible: false },
+          })
+        );
+      }
+    } catch (error) {
+      console.error(error);
+
+      showToast("Error al iniciar sesión", "error");
+
+      setLoading(false);
+
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(
+          new CustomEvent("wc-loader", {
+            detail: { visible: false },
+          })
+        );
+      }
     }
   };
 
   return (
-    <div className="login-container">
-      {loading && <Loading message="Iniciando sesión..." />}
-      
-      <div className="login-card">
-        <h1 className="title">CreditMind</h1>
+    <>
+      <Carga visible={loading} />
 
-        {error && <div className="error">{error}</div>}
+      <div className="login-container">
+        <div className="login-card">
+          <h1>World Cup Album</h1>
 
-        <form onSubmit={handleEmailPasswordSignIn}>
-          <label>Correo electrónico</label>
-          <input
-            type="email"
-            placeholder="tu@email.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
+          <p>Inicia sesión con Google</p>
+
+          <button
+            className="google-btn"
+            onClick={loginGoogle}
             disabled={loading}
-          />
-
-          <label>Contraseña</label>
-          <div className="password-wrapper">
-            <input
-              type={showPassword ? "text" : "password"}
-              placeholder="Ingresa tu contraseña"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              disabled={loading}
+            aria-busy={loading}
+          >
+            <img
+              src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/google/google-original.svg"
+              alt="Google"
             />
-            <button
-              type="button"
-              className="password-toggle"
-              onClick={() => setShowPassword(!showPassword)}
-              disabled={loading}
-            >
-              {showPassword ? <FaEyeSlash /> : <FaEye />}
-            </button>
-          </div>
-
-          <button type="submit" className="btn-next" disabled={loading}>
-            Iniciar sesión
+            Continuar con Google
           </button>
-        </form>
-
-        <div className="divider">o</div>
-
-        <button
-          type="button"
-          className="google-btn"
-          onClick={handleGoogleSignIn}
-          disabled={loading}
-        >
-          <FaGoogle />
-          Continuar con Google
-        </button>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 
 export default Login;
-

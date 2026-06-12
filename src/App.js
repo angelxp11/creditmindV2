@@ -1,262 +1,260 @@
 import React, { useEffect, useState } from "react";
+import { onAuthStateChanged } from "firebase/auth";
 import {
-  onAuthStateChanged,
-  signOut,
-} from "firebase/auth";
+  doc,
+  getDoc,
+  collection,
+  query,
+  where,
+  onSnapshot,
+  getDocs,
+} from "firebase/firestore";
 
-import { auth } from "./server/api";
+import { auth, db } from "./server/api";
 
-import Login from "./components/login/login";
-import Home from "./components/home/home";
-import PQR from "./components/pqr/pqr";
-import Cuentas from "./components/cuentas/cuentas";
-import Deudas from "./components/deudas/deudas";
-import Movimientos from "./components/movimientos/movimientos";
-import VerMovimientos from "./components/movimientos/vermovimientos/vermovimientos";
-import Ingresos from "./components/movimientos/ingresos/ingresos";
-
-import Loading from "./resources/loading/loading";
-import ToastContainer from "./resources/toastcontainer/ToastContainer";
+import Login from "./Components/login/login";
 import Navbar from "./resources/navbar/navbar";
-import ConfirmModal from "./resources/modalquestion/modalquestion";
+import Home from "./Components/home/home";
+import Footer from "./resources/footer/footer";
+import Cargar from "./Components/adminalbum/cargar";
+import AdquirirAlbum from "./Components/adminalbum/adquiriralbum/adquiriralbum";
+import CargarLaminas from "./Components/adminalbum/cargarlaminas";
+import Contenido from "./Components/home/contenido/contenido";
+import Amigos from "./amigos/amigos";
+
+import Carga from "./resources/carga/carga";
+import ToastContainer from "./resources/toast/ToastContainer";
+
+import "./App.css";
 
 function App() {
   const [user, setUser] = useState(null);
-  const [checkingAuth, setCheckingAuth] = useState(true);
-  const [authDebug, setAuthDebug] = useState("INICIANDO");
 
-  const [showLogoutModal, setShowLogoutModal] = useState(false);
-  const [showCuentas, setShowCuentas] = useState(false);
-  const [showDeudas, setShowDeudas] = useState(false);
-  const [showMovimientos, setShowMovimientos] = useState(false);
-  const [showVerMovimientos, setShowVerMovimientos] = useState(false);
-  const [showIngresos, setShowIngresos] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [actionLoading, setActionLoading] = useState(false);
 
-  const [modalData, setModalData] = useState({
-    title: "",
-    question: "",
-  });
+  const [albums, setAlbums] = useState([]);
 
+  const [cargarModalOpen, setCargarModalOpen] = useState(false);
+  const [adquirirModalOpen, setAdquirirModalOpen] = useState(false);
+  const [cargarLaminasOpen, setCargarLaminasOpen] = useState(false);
+
+  const [selectedAlbum, setSelectedAlbum] = useState(null);
+  const [amigosView, setAmigosView] = useState(false);
+
+  // ================= RECARGAR ÁLBUMES =================
+  const fetchAlbums = async (uid) => {
+    try {
+      const albumsQuery = query(
+        collection(db, "album_usuario"),
+        where("idUsuario", "==", uid)
+      );
+
+      const albumsSnap = await getDocs(albumsQuery);
+
+      setAlbums(
+        albumsSnap.docs.map((docu) => ({
+          id: docu.id,
+          ...docu.data(),
+        }))
+      );
+    } catch (err) {
+      console.error("Error recargando álbumes:", err);
+    }
+  };
+
+  // ================= AUTH =================
   useEffect(() => {
-    console.log("App montada");
-    console.log("🔍 Verificando sesión guardada...");
+    let unsubscribeAlbums = null;
 
-    // Variable para rastrear si el callback fue llamado
-    let authCheckCompleted = false;
-    let timeoutId = null;
-
-    const unsubscribe = onAuthStateChanged(
+    const unsubscribeAuth = onAuthStateChanged(
       auth,
-      (currentUser) => {
-        authCheckCompleted = true;
-        
-        console.log("✅ onAuthStateChanged callback ejecutado");
-        console.log("CURRENT USER:", auth.currentUser);
-        
-        // Debug: mostrar localStorage items
-        console.log("LOCAL STORAGE ITEMS:", localStorage.length);
-        for (let i = 0; i < localStorage.length; i++) {
-          const key = localStorage.key(i);
-          const value = localStorage.getItem(key);
-          console.log(`  [${key}]:`, value ? value.substring(0, 50) + "..." : "empty");
-        }
+      async (currentUser) => {
+        try {
+          if (currentUser) {
+            // ================= USER DATA =================
+            const userDocRef = doc(db, "usuarios", currentUser.uid);
 
-        // Debug: mostrar IndexedDB info
-        if (indexedDB) {
-          indexedDB.databases().then((dbs) => {
-            console.log("📦 IndexedDB databases:", dbs.map(db => db.name));
-          });
-        }
+            const userDocSnap = await getDoc(userDocRef);
 
-        console.log("onAuthStateChanged =>", currentUser);
+            if (userDocSnap.exists()) {
+              const userData = userDocSnap.data();
 
-        if (currentUser) {
-          setAuthDebug(
-            `✅ LOGUEADO | ${currentUser.email} | UID: ${currentUser.uid}`
-          );
-          console.log("🟢 Usuario autenticado:", currentUser.email);
-        } else {
-          setAuthDebug("⚠️ SIN SESION");
-          console.log("🔴 No hay usuario autenticado");
-        }
+              setUser({
+                ...currentUser,
+                rol: userData.rol || "usuario",
+              });
+            } else {
+              setUser(currentUser);
+            }
 
-        setUser(currentUser);
-        setCheckingAuth(false);
-        
-        // Limpiar timeout si existe
-        if (timeoutId) {
-          clearTimeout(timeoutId);
+            // ================= REALTIME ÁLBUMES =================
+            try {
+              const albumsQuery = query(
+                collection(db, "album_usuario"),
+                where("idUsuario", "==", currentUser.uid)
+              );
+
+              unsubscribeAlbums = onSnapshot(
+                albumsQuery,
+                (snapshot) => {
+                  setAlbums(
+                    snapshot.docs.map((docu) => ({
+                      id: docu.id,
+                      ...docu.data(),
+                    }))
+                  );
+                },
+                (err) => {
+                  console.error(
+                    "Error realtime álbumes:",
+                    err
+                  );
+
+                  setAlbums([]);
+                }
+              );
+            } catch (err) {
+              console.error(
+                "Error iniciando realtime álbumes:",
+                err
+              );
+
+              setAlbums([]);
+            }
+          } else {
+            setUser(null);
+            setAlbums([]);
+
+            if (unsubscribeAlbums) {
+              unsubscribeAlbums();
+              unsubscribeAlbums = null;
+            }
+          }
+        } finally {
+          setLoading(false);
         }
-      },
-      (error) => {
-        console.error("❌ Error en onAuthStateChanged:", error);
-        setAuthDebug(`ERROR: ${error.message}`);
-        setCheckingAuth(false);
       }
     );
 
-    // Fallback timeout: si Auth no responde en 3 segundos, continuar de todas formas
-    timeoutId = setTimeout(() => {
-      if (!authCheckCompleted) {
-        console.warn("⚠️ Auth check timeout - continuando sin esperar más");
-        setCheckingAuth(false);
-      }
-    }, 3000);
-
     return () => {
-      unsubscribe();
-      if (timeoutId) {
-        clearTimeout(timeoutId);
+      unsubscribeAuth();
+
+      if (unsubscribeAlbums) {
+        unsubscribeAlbums();
       }
     };
   }, []);
 
+  // ================= LOADER GLOBAL =================
   useEffect(() => {
-    console.log("USER STATE ACTUALIZADO =>", user);
-  }, [user]);
+    const handleLoaderEvent = (event) => {
+      const visible = event?.detail?.visible;
 
-  const handleLogout = async () => {
-    try {
-      console.log("🔓 Cerrando sesión...");
-      await signOut(auth);
-      console.log("✅ Sesión cerrada correctamente");
-      setShowLogoutModal(false);
-    } catch (error) {
-      console.error("❌ Error al cerrar sesión:", error);
-    }
-  };
+      if (typeof visible === "boolean") {
+        setActionLoading(visible);
+      }
+    };
 
-  if (checkingAuth) {
-    return (
-      <>
-        <ToastContainer />
-        <Loading message="Verificando sesión..." />
-      </>
+    window.addEventListener(
+      "wc-loader",
+      handleLoaderEvent
     );
-  }
 
+    return () => {
+      window.removeEventListener(
+        "wc-loader",
+        handleLoaderEvent
+      );
+    };
+  }, []);
+
+  // ================= RENDER =================
   return (
     <>
-      {/* DEBUG PANEL */}
-      <div
-        style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          right: 0,
-          background: user ? "#22c55e" : "#ef4444",
-          color: "#fff",
-          zIndex: 999999,
-          padding: "8px",
-          fontSize: "11px",
-          wordBreak: "break-word",
-          fontFamily: "monospace",
-        }}
-      >
-        <strong>STATUS:</strong> {authDebug}
-        <br />
-        <strong>auth.currentUser:</strong> {auth.currentUser ? auth.currentUser.email : "NULL"}
-        <br />
-        <strong>RENDER:</strong> {user ? "🟢 HOME" : "🔴 LOGIN"}
-      </div>
-
+      {/* TOAST */}
       <ToastContainer />
 
-      {user ? (
-        <>
+      {/* LOADER */}
+      <Carga visible={loading || actionLoading} />
+
+      {/* LOGIN */}
+      {!loading && !user && <Login />}
+
+      {/* APP */}
+      {!loading && user && (
+        <div className="app-container">
           <Navbar
-            onLogout={(data) => {
-              setModalData(data);
-              setShowLogoutModal(true);
-            }}
-            onOpenCuentas={() => {
-              setShowCuentas(true);
-              setShowDeudas(false);
-              setShowMovimientos(false);
-              setShowVerMovimientos(false);
-              setShowIngresos(false);
-            }}
-            onOpenDeudas={() => {
-              setShowDeudas(true);
-              setShowCuentas(false);
-              setShowMovimientos(false);
-              setShowVerMovimientos(false);
-              setShowIngresos(false);
-            }}
-            onOpenMovimientos={() => {
-              setShowMovimientos(true);
-              setShowCuentas(false);
-              setShowDeudas(false);
-              setShowVerMovimientos(false);
-              setShowIngresos(false);
-            }}
-            onOpenIngresos={() => {
-              setShowIngresos(true);
-              setShowCuentas(false);
-              setShowDeudas(false);
-              setShowMovimientos(false);
-              setShowVerMovimientos(false);
-            }}
-            onOpenVerMovimientos={() => {
-              setShowVerMovimientos(true);
-              setShowCuentas(false);
-              setShowDeudas(false);
-              setShowMovimientos(false);
-              setShowIngresos(false);
-            }}
-            onGoHome={() => {
-              setShowCuentas(false);
-              setShowDeudas(false);
-              setShowMovimientos(false);
-              setShowVerMovimientos(false);
-              setShowIngresos(false);
-            }}
+            user={user}
+            onOpenCargar={() =>
+              setCargarModalOpen(true)
+            }
+            onOpenAdquirir={() =>
+              setAdquirirModalOpen(true)
+            }
+            onOpenCargarLaminas={() =>
+              setCargarLaminasOpen(true)
+            }
+            onOpenAmigos={() =>
+              setAmigosView(true)
+            }
           />
 
-          <Cuentas
-            isOpen={showCuentas}
-            onClose={() => setShowCuentas(false)}
+          {amigosView ? (
+            <Amigos
+              user={user}
+              albums={albums}
+              onBack={() => {
+                setAmigosView(false);
+                setSelectedAlbum(null);
+              }}
+            />
+          ) : selectedAlbum ? (
+            <Contenido
+              album={selectedAlbum}
+              onBack={() =>
+                setSelectedAlbum(null)
+              }
+            />
+          ) : (
+            <>
+              <Home
+                user={user}
+                albums={albums}
+                onSelectAlbum={setSelectedAlbum}
+              />
+
+              <Footer />
+            </>
+          )}
+
+          {/* MODAL CARGAR */}
+          <Cargar
+            isOpen={cargarModalOpen}
+            onClose={() =>
+              setCargarModalOpen(false)
+            }
           />
 
-          <Deudas
-            isOpen={showDeudas}
-            onClose={() => setShowDeudas(false)}
+          {/* MODAL ADQUIRIR */}
+          <AdquirirAlbum
+            isOpen={adquirirModalOpen}
+            onClose={() =>
+              setAdquirirModalOpen(false)
+            }
+            onAlbumAcquired={() =>
+              fetchAlbums(user.uid)
+            }
           />
 
-          <Movimientos
-            isOpen={showMovimientos}
-            onClose={() => setShowMovimientos(false)}
+          {/* MODAL CARGAR LÁMINAS */}
+          <CargarLaminas
+            isOpen={cargarLaminasOpen}
+            onClose={() =>
+              setCargarLaminasOpen(false)
+            }
           />
-
-          <Ingresos
-            isOpen={showIngresos}
-            onClose={() => setShowIngresos(false)}
-          />
-
-          <VerMovimientos
-            isOpen={showVerMovimientos}
-            onClose={() => setShowVerMovimientos(false)}
-          />
-
-          {!showCuentas &&
-            !showDeudas &&
-            !showMovimientos &&
-            !showVerMovimientos && <Home />}
-
-          <PQR />
-
-          <ConfirmModal
-            isOpen={showLogoutModal}
-            title={modalData.title}
-            description={modalData.question}
-            confirmText="Cerrar sesión"
-            cancelText="Cancelar"
-            onConfirm={handleLogout}
-            onCancel={() => setShowLogoutModal(false)}
-          />
-        </>
-      ) : (
-        <Login />
+        </div>
       )}
     </>
   );

@@ -1,30 +1,224 @@
+/* ================= HOME CONTAINER ================= */
+
 .home-container {
-  min-height: 100vh;
-  background: var(--bg-primary);
+  flex: 1;
+
+  width: 100%;
+
+  padding: 40px 20px;
+
+  margin-top: 75px;
+
+  margin-bottom: 150px;
+
   display: flex;
-  justify-content: center;
   align-items: center;
-  padding: 20px;
+  justify-content: center;
 }
 
-.home-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
-  border-radius: 20px;
-  padding: 60px 80px;
+/* ================= HOME CONTENT ================= */
+
+.home-content {
+  width: 100%;
+  max-width: 1300px;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 40px;
+}
+
+/* ================= WELCOME ================= */
+
+.welcome-section {
   text-align: center;
-  box-shadow: 0 14px 35px rgba(0, 0, 0, 0.25);
 }
 
-.home-title {
-  color: var(--text-title);
-  font-size: 3rem;
+.welcome-section h1 {
+  font-size: 2.8rem;
+
+  margin: 0 0 10px 0;
+
+  color: var(--text-primary);
+
+  font-weight: 800;
+}
+
+.welcome-section p {
+  font-size: 1.1rem;
+
+  color: var(--text-secondary);
+
   margin: 0;
+}
+
+/* ================= EMPTY ================= */
+
+.empty-albums {
+  width: 100%;
+
+  padding: 60px 20px;
+
+  border-radius: 24px;
+
+  background: var(--bg-card);
+
+  border: 1px solid var(--border-color);
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  gap: 15px;
+
+  text-align: center;
+
+  box-shadow: var(--shadow-sm);
+}
+
+.empty-albums svg {
+  color: var(--primary);
+}
+
+.empty-albums h2 {
+  margin: 0;
+
+  color: var(--text-primary);
+
+  font-size: 1.8rem;
+}
+
+.empty-albums p {
+  margin: 0;
+
+  color: var(--text-secondary);
+
+  font-size: 1rem;
+}
+
+/* ================= GRID ================= */
+
+.albums-grid {
+  display: grid;
+
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(250px, 1fr)
+  );
+
+  gap: 28px;
+}
+
+/* ================= CARD ================= */
+
+.album-card {
+  background: var(--bg-card);
+
+  border: 1px solid var(--border-color);
+
+  border-radius: 24px;
+
+  overflow: hidden;
+
+  transition: var(--transition);
+
+  box-shadow: var(--shadow-sm);
+
+  cursor: pointer;
+}
+
+.album-card:hover {
+  transform: translateY(-8px);
+
+  box-shadow: var(--shadow-md);
+
+  border-color: var(--primary);
+}
+
+.album-image {
+  width: 100%;
+  height: 340px;
+
+  object-fit: cover;
+}
+
+.album-content {
+  padding: 18px;
+}
+
+.album-content h3 {
+  margin: 0;
+
+  color: var(--text-primary);
+
+  font-size: 1.3rem;
+
   font-weight: 700;
 }
 
-.home-subtitle {
-  margin-top: 16px;
-  color: var(--text-label);
-  font-size: 1.2rem;
+.album-content p {
+  margin-top: 8px;
+
+  color: var(--text-secondary);
+
+  font-size: 0.95rem;
+}
+
+/* ================= PROGRESS BAR ================= */
+
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  background: var(--bg-secondary);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-top: 12px;
+  box-shadow: var(--shadow-sm);
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary), var(--success));
+  border-radius: 10px;
+  transition: width 0.3s ease;
+}
+
+.progress-text {
+  margin-top: 8px !important;
+  font-size: 0.85rem !important;
+  font-weight: 600;
+  color: var(--primary);
+}
+
+/* ================= RESPONSIVE ================= */
+
+@media (max-width: 768px) {
+
+  .home-container {
+    padding: 25px 15px;
+
+    margin-bottom: 120px;
+  }
+
+  .home-content {
+    gap: 30px;
+  }
+
+  .welcome-section h1 {
+    font-size: 2rem;
+  }
+
+  .albums-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .album-image {
+    height: 300px;
+  }
+
+  .empty-albums {
+    padding: 40px 20px;
+  }
+
 }

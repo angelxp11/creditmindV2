@@ -1,59 +1,39 @@
 // Import Firebase core
 import { initializeApp } from "firebase/app";
 
-// Analytics
+// Analytics (opcional)
 import { getAnalytics } from "firebase/analytics";
 
 // 🔥 AUTH
-import {
-  getAuth,
-  setPersistence,
-  indexedDBLocalPersistence,
-  browserLocalPersistence
-} from "firebase/auth";
+import { getAuth } from "firebase/auth";
 
 // 🔥 FIRESTORE
 import { getFirestore } from "firebase/firestore";
 
+
 const firebaseConfig = {
-  apiKey: "AIzaSyC2FhFI0sXYy-lAC_G42B6Dh6fVh6gfCm8",
-  authDomain: "creditmind-8ea8b.firebaseapp.com",
-  projectId: "creditmind-8ea8b",
-  storageBucket: "creditmind-8ea8b.firebasestorage.app",
-  messagingSenderId: "891749664306",
-  appId: "1:891749664306:web:2be791460e20429c0a9e2b",
-  measurementId: "G-ZTNJ75ZWYN"
+  apiKey: "AIzaSyDQJLnQLeXWyR4t4ZZXTnX4vue1yT0TpIg",
+  authDomain: "controllaminasfifa.firebaseapp.com",
+  projectId: "controllaminasfifa",
+  storageBucket: "controllaminasfifa.firebasestorage.app",
+  messagingSenderId: "69356050424",
+  appId: "1:69356050424:web:39d452214020f96c1a680d",
+  measurementId: "G-2DQSWWKNP1"
 };
+
 
 // Inicializar Firebase
 const app = initializeApp(firebaseConfig);
 
 // Servicios
 const auth = getAuth(app);
-
-// 🔧 PERSISTENCIA CON FALLBACK (IndexedDB primero, luego localStorage)
-setPersistence(auth, indexedDBLocalPersistence)
-  .then(() => {
-    console.log("✅ Persistencia IndexedDB activada (iOS PWA compatible)");
-  })
-  .catch(() => {
-    // Si IndexedDB falla, usa localStorage
-    return setPersistence(auth, browserLocalPersistence)
-      .then(() => {
-        console.log("✅ Persistencia localStorage activada (fallback)");
-      })
-      .catch((error) => {
-        console.error("❌ Error configurando persistencia:", error);
-      });
-  });
-
 const db = getFirestore(app);
 
-// Analytics (solo navegador)
+// Analytics (solo funciona en navegador)
 let analytics;
 if (typeof window !== "undefined") {
   analytics = getAnalytics(app);
 }
 
-// Exportar
+// Exportar para usar en el proyecto
 export { auth, db, analytics };
