@@ -1,6 +1,7 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "CreditMind",
+  "name": "CreditMind - Finanzas Inteligentes",
+  "description": "Gestiona tus finanzas, controla gastos, analiza ingresos y toma mejores decisiones financieras.",
   "icons": [
     {
       "src": "favicon.ico",
@@ -9,17 +10,26 @@
     },
     {
       "src": "logo192.png",
+      "sizes": "192x192",
       "type": "image/png",
-      "sizes": "192x192"
+      "purpose": "any maskable"
     },
     {
       "src": "logo512.png",
+      "sizes": "512x512",
       "type": "image/png",
-      "sizes": "512x512"
+      "purpose": "any maskable"
     }
   ],
-  "start_url": ".",
+  "start_url": "/",
+  "scope": "/",
   "display": "standalone",
-  "theme_color": "#000000",
-  "background_color": "#ffffff"
+  "orientation": "portrait",
+  "theme_color": "#06b6d4",
+  "background_color": "#0f172a",
+  "categories": [
+    "finance",
+    "business",
+    "productivity"
+  ]
 }
