@@ -1,0 +1,33 @@
+body.light-theme {
+  /* ===== FONDOS ===== */
+  --bg-primary: #f8fafc;
+  --bg-secondary: #ffffff;
+  --bg-card: #ffffff;
+  --bg-hover: #f1f5f9;
+
+  /* ===== TEXTOS ===== */
+  --text-title: #0f172a;
+  --text-primary: #1e293b;
+  --text-label: #64748b;
+  --text-muted: #94a3b8;
+
+  /* ===== BORDES ===== */
+  --border-color: #cbd5e1;
+
+  /* ===== BOTÓN PRINCIPAL */
+  --btn-primary-bg: #0891b2;
+  --btn-primary-hover: #0e7490;
+  --btn-primary-text: #ffffff;
+
+  /* ===== BOTÓN BLOQUEADO */
+  --btn-disabled-bg: #e2e8f0;
+  --btn-disabled-text: #94a3b8;
+  --btn-disabled-border: #cbd5e1;
+
+  /* ===== ALERTAS ===== */
+  --danger: #dc2626;
+  --success: #16a34a;
+
+  /* ===== EXTRA */
+  --accent-color: #0891b2;
+}

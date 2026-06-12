@@ -1,0 +1,445 @@
+/* adminpr.css */
+
+.adminpr-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 5000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(6px);
+}
+
+.adminpr-modal {
+  width: 100%;
+  max-width: 950px;
+  height: 88vh;
+
+  display: flex;
+  flex-direction: column;
+
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 28px;
+
+  overflow: hidden;
+
+  box-shadow:
+    0 20px 50px rgba(0, 0, 0, 0.12);
+
+  animation: adminprFade 0.22s ease;
+}
+
+@keyframes adminprFade {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* =========================
+   HEADER
+========================= */
+
+.adminpr-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 22px 24px;
+
+  border-bottom: 1px solid var(--border-color);
+
+  background: var(--bg-secondary);
+}
+
+.adminpr-header h2 {
+  margin: 0;
+
+  color: var(--text-title);
+  font-size: 1.45rem;
+  font-weight: 700;
+}
+
+.adminpr-close {
+  width: 44px;
+  height: 44px;
+
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+
+  background: var(--bg-hover);
+  color: var(--text-primary);
+
+  font-size: 1rem;
+  cursor: pointer;
+
+  transition: 0.2s ease;
+}
+
+.adminpr-close:hover {
+  background: var(--bg-primary);
+  transform: scale(1.04);
+}
+
+/* =========================
+   CONTENT
+========================= */
+
+.adminpr-content {
+  flex: 1;
+
+  overflow-y: auto;
+
+  padding: 24px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+
+  background: var(--bg-primary);
+}
+
+.adminpr-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.adminpr-content::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 20px;
+}
+
+/* =========================
+   CARD
+========================= */
+
+.adminpr-card {
+  background: var(--bg-card);
+
+  border: 1px solid var(--border-color);
+  border-radius: 22px;
+
+  padding: 22px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.adminpr-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.adminpr-email {
+  color: var(--text-title);
+  font-weight: 700;
+  font-size: 0.98rem;
+
+  word-break: break-word;
+}
+
+.adminpr-date {
+  color: var(--text-muted);
+  font-size: 0.84rem;
+}
+
+.adminpr-message {
+  margin: 0;
+
+  color: var(--text-primary);
+  line-height: 1.7;
+
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* =========================
+   ACTIONS
+========================= */
+
+.adminpr-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.adminpr-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.adminpr-field label {
+  color: var(--text-label);
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+.adminpr-field select,
+.adminpr-field textarea {
+
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+
+  padding: 14px 16px;
+
+  font-size: 0.95rem;
+
+  outline: none;
+
+  transition: 0.2s ease;
+}
+
+.adminpr-field select:focus,
+.adminpr-field textarea:focus {
+  border-color: var(--accent-color);
+  box-shadow:
+    0 0 0 4px rgba(8, 145, 178, 0.12);
+}
+
+.adminpr-field textarea {
+  min-height: 120px;
+  resize: vertical;
+  font-family: inherit;
+}
+
+/* =========================
+   BUTTON
+========================= */
+
+.adminpr-save {
+  border: none;
+  border-radius: 16px;
+
+  background: var(--btn-primary-bg);
+  color: var(--btn-primary-text);
+
+  padding: 14px 18px;
+
+  font-size: 0.95rem;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition: 0.2s ease;
+}
+
+.adminpr-save:hover {
+  background: var(--btn-primary-hover);
+  transform: translateY(-1px);
+}
+
+.adminpr-save:disabled {
+  background: var(--btn-disabled-bg);
+  color: var(--btn-disabled-text);
+
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* =========================
+   HISTORY
+========================= */
+
+.adminpr-history {
+  border-top: 1px solid var(--border-color);
+  padding-top: 18px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.adminpr-history h4 {
+  margin: 0;
+
+  color: var(--text-title);
+  font-size: 1rem;
+}
+
+.history-item {
+  padding: 16px;
+
+  border-radius: 16px;
+
+  background: var(--bg-hover);
+  border: 1px solid var(--border-color);
+
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.history-status {
+  width: fit-content;
+
+  padding: 6px 12px;
+
+  border-radius: 999px;
+
+  background: rgba(8, 145, 178, 0.12);
+  color: var(--accent-color);
+
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.history-item p {
+  margin: 0;
+
+  color: var(--text-primary);
+  line-height: 1.6;
+}
+
+.history-item small {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.adminpr-empty,
+.adminpr-empty-history {
+  text-align: center;
+  color: var(--text-muted);
+}
+
+/* =========================
+   MOBILE
+========================= */
+
+@media (max-width: 768px) {
+  .adminpr-overlay {
+    padding: 0;
+    align-items: flex-end;
+  }
+
+  .adminpr-modal {
+    max-width: 100%;
+    height: 94vh;
+
+    border-radius: 28px 28px 0 0;
+  }
+
+  .adminpr-header {
+    padding: 18px;
+  }
+
+  .adminpr-header h2 {
+    font-size: 1.2rem;
+  }
+
+  .adminpr-content {
+    padding: 18px;
+  }
+
+  .adminpr-card {
+    padding: 18px;
+    border-radius: 18px;
+  }
+
+  .adminpr-top {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .adminpr-email {
+    font-size: 0.92rem;
+  }
+
+  .adminpr-message {
+    font-size: 0.92rem;
+  }
+
+  .adminpr-field textarea {
+    min-height: 100px;
+  }
+
+  .adminpr-save {
+    width: 100%;
+  }
+}
+/* AGREGAR AL FINAL DE adminpr.css */
+
+/* =========================
+   FILTERS
+========================= */
+
+.adminpr-filters {
+  display: flex;
+  gap: 12px;
+
+  overflow-x: auto;
+
+  padding: 18px 24px;
+
+  background: var(--bg-secondary);
+
+  border-bottom: 1px solid
+    var(--border-color);
+}
+
+.adminpr-filters::-webkit-scrollbar {
+  height: 6px;
+}
+
+.adminpr-filters::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 999px;
+}
+
+.filter-btn {
+  border: 1px solid
+    var(--border-color);
+
+  background: var(--bg-card);
+  color: var(--text-primary);
+
+  padding: 10px 16px;
+
+  border-radius: 999px;
+
+  font-size: 0.9rem;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  white-space: nowrap;
+
+  transition: 0.2s ease;
+}
+
+.filter-btn:hover {
+  background: var(--bg-hover);
+}
+
+.filter-btn.active {
+  background: var(--btn-primary-bg);
+  color: var(--btn-primary-text);
+
+  border-color: var(--btn-primary-bg);
+}
+
+@media (max-width: 768px) {
+  .adminpr-filters {
+    padding: 16px 18px;
+  }
+
+  .filter-btn {
+    padding: 9px 14px;
+    font-size: 0.85rem;
+  }
+}

@@ -1,0 +1,42 @@
+.theme-container {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.theme-container h3 {
+  font-size: 24px;
+  color: var(--text-title);
+}
+
+.theme-container p {
+  color: var(--text-primary);
+}
+
+.theme-options {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 10px;
+}
+
+.theme-options button {
+  border: 1px solid var(--border-color);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  padding: 16px;
+  border-radius: 14px;
+  cursor: pointer;
+  font-size: 15px;
+  text-align: left;
+  transition: 0.25s;
+}
+
+.theme-options button:hover {
+  transform: translateY(-2px);
+}
+
+.theme-options button.active {
+  border-color: var(--accent-color);
+  background: rgba(100, 149, 237, 0.12);
+}

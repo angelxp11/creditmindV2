@@ -1,0 +1,118 @@
+rules_version = '2';
+
+// Configuración principal de Firestore
+service cloud.firestore {
+
+  // Aplica las reglas a toda la base de datos
+  match /databases/{database}/documents {
+
+    // ==========================
+    // COLECCIÓN PQR
+    // ==========================
+    match /pqr/{document} {
+      // Crear PQR solo autenticados
+      allow create: if request.auth != null;
+
+      // Leer solo admin
+      allow read: if request.auth != null
+        && request.auth.token.email == "jocheangel728@gmail.com";
+
+      // Modificar solo admin
+      allow update: if request.auth != null
+        && request.auth.token.email == "jocheangel728@gmail.com";
+
+      // Eliminar solo admin
+      allow delete: if request.auth != null
+        && request.auth.token.email == "jocheangel728@gmail.com";
+    }
+
+    // ==========================
+    // COLECCIÓN USUARIOS
+    // ==========================
+    match /usuarios/{userId} {
+      // Permite crear o actualizar solo si el usuario autenticado
+      // está modificando SU propio documento
+      allow create, update: if request.auth != null
+        && request.auth.uid == userId;
+
+      // Permite que el usuario lea únicamente su información
+      allow read: if request.auth != null
+        && request.auth.uid == userId;
+
+      // Bloquea eliminación
+      allow delete: if false;
+    }
+
+    // ==========================
+    // COLECCIÓN CUENTAS
+    // ==========================
+    match /cuentas/{docId} {
+      // Crear cuenta: usuario autenticado y `usuarioId` coincide con auth.uid
+      allow create: if request.auth != null
+        && request.resource.data.userId == request.auth.uid;
+
+      // Leer la cuenta solo el propietario
+      allow read: if request.auth != null
+        && resource.data.userId == request.auth.uid;
+
+      // Actualizar solo el propietario y no permitir cambiar el dueño
+      allow update: if request.auth != null
+        && resource.data.userId == request.auth.uid
+        && request.resource.data.userId == resource.data.userId;
+
+      // No permitir eliminar
+      allow delete: if false;
+    }
+
+    // ==========================
+    // COLECCIÓN MOVIMIENTOS
+    // ==========================
+    match /movimientos/{docId} {
+      // Crear movimiento: usuario autenticado y userId igual a auth.uid
+      // Además validamos campos básicos para evitar entradas malformadas
+      allow create: if request.auth != null
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.cuentaId is string
+        && request.resource.data.valor is number;
+
+      // Leer movimientos: solo el propietario
+      allow read: if request.auth != null
+        && resource.data.userId == request.auth.uid;
+
+      // Actualizar / eliminar solamente admin (bloqueado por defecto)
+      allow update, delete: if false;
+    }
+
+    // ==========================
+    // COLECCIÓN TARJETAS
+    // ==========================
+    match /tarjetas/{docId} {
+      // Crear tarjeta: usuario autenticado y userId coincide con auth.uid
+      // Validamos que los campos requeridos sean del tipo correcto
+      allow create: if request.auth != null
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.nombre is string
+        && request.resource.data.banco is string
+        && request.resource.data.cupoTotal is number
+        && request.resource.data.cupoDisponible is number;
+
+      // Leer las tarjetas solo el propietario
+      // Permite queries simples por userId sin requerir índice compuesto
+      allow read: if request.auth != null
+        && resource.data.userId == request.auth.uid;
+
+      // Actualizar solo el propietario y no permitir cambiar el dueño
+      // Validar que el cupo disponible no exceda el total
+      allow update: if request.auth != null
+        && resource.data.userId == request.auth.uid
+        && request.resource.data.userId == resource.data.userId
+        && request.resource.data.nombre is string
+        && request.resource.data.banco is string
+        && request.resource.data.cupoDisponible <= request.resource.data.cupoTotal;
+
+      // Eliminar solo el propietario
+      allow delete: if request.auth != null
+        && resource.data.userId == request.auth.uid;
+    }
+  }
+}

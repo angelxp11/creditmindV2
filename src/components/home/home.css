@@ -1,0 +1,30 @@
+.home-container {
+  min-height: 100vh;
+  background: var(--bg-primary);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+.home-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  padding: 60px 80px;
+  text-align: center;
+  box-shadow: 0 14px 35px rgba(0, 0, 0, 0.25);
+}
+
+.home-title {
+  color: var(--text-title);
+  font-size: 3rem;
+  margin: 0;
+  font-weight: 700;
+}
+
+.home-subtitle {
+  margin-top: 16px;
+  color: var(--text-label);
+  font-size: 1.2rem;
+}

@@ -1,0 +1,33 @@
+body.dark-theme {
+  /* ===== FONDOS ===== */
+  --bg-primary: #020617;
+  --bg-secondary: #0f172a;
+  --bg-card: #1e293b;
+  --bg-hover: #334155;
+
+  /* ===== TEXTOS ===== */
+  --text-title: #f8fafc;
+  --text-primary: #e2e8f0;
+  --text-label: #cbd5e1;
+  --text-muted: #94a3b8;
+
+  /* ===== BORDES ===== */
+  --border-color: #334155;
+
+  /* ===== BOTÓN PRINCIPAL */
+  --btn-primary-bg: #06b6d4;
+  --btn-primary-hover: #0891b2;
+  --btn-primary-text: #ffffff;
+
+  /* ===== BOTÓN BLOQUEADO */
+  --btn-disabled-bg: #1e293b;
+  --btn-disabled-text: #64748b;
+  --btn-disabled-border: #334155;
+
+  /* ===== ALERTAS ===== */
+  --danger: #ef4444;
+  --success: #22c55e;
+
+  /* ===== EXTRA */
+  --accent-color: #06b6d4;
+}
