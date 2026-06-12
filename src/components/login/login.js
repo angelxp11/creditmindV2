@@ -37,46 +37,21 @@ const Login = () => {
   };
 
   const handleGoogleSignIn = async () => {
-    setLoading(true);
-    setError("");
-    try {
-      const provider = new GoogleAuthProvider();
-      const provider = new GoogleAuthProvider();
+  setLoading(true);
+  setError("");
 
-await signInWithRedirect(auth, provider);
+  try {
+    const provider = new GoogleAuthProvider();
 
-return;
+    await signInWithRedirect(auth, provider);
 
-      // Referencia al documento en la colección "usuarios"
-      const userDocRef = doc(db, "usuarios", user.uid);
-      
-      // Verificar si el usuario ya existe
-      const existingDoc = await getDoc(userDocRef);
-
-      // Si el usuario no existe, crear el documento con los datos especificados
-      if (!existingDoc.exists()) {
-        await setDoc(userDocRef, {
-          correo: "jocheangel715@gmail.com",
-          fechaRegistro: createRegistrationTimestamp(),
-          nombreCompleto: "jose angel bermudez choperena",
-          uid: user.uid,
-          // Otros campos útiles
-          email: user.email,
-          displayName: user.displayName,
-          photoURL: user.photoURL,
-          createdAt: serverTimestamp()
-        });
-      }
-
-      showToast("¡Sesión iniciada correctamente!", "success");
-    } catch (err) {
-      console.error("Error en login con Google:", err);
-      setError(err.message);
-      showToast("Error al iniciar sesión con Google", "error");
-    } finally {
-      setLoading(false);
-    }
-  };
+  } catch (err) {
+    console.error("Error en login con Google:", err);
+    setError(err.message);
+    showToast("Error al iniciar sesión con Google", "error");
+    setLoading(false);
+  }
+};
 
   const handleEmailPasswordSignIn = async (e) => {
     e.preventDefault();
