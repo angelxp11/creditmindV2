@@ -21,8 +21,8 @@
       "purpose": "any maskable"
     }
   ],
-  "start_url": "/",
-  "scope": "/",
+  "start_url": "/creditmindv2/",
+"scope": "/creditmindv2/" ,
   "display": "standalone",
   "orientation": "portrait",
   "theme_color": "#06b6d4",
