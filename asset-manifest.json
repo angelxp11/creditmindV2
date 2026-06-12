@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/creditmindV2/static/css/main.e1bf785f.css",
+    "main.js": "/creditmindV2/static/js/main.a5faa92e.js",
+    "index.html": "/creditmindV2/index.html",
+    "main.e1bf785f.css.map": "/creditmindV2/static/css/main.e1bf785f.css.map",
+    "main.a5faa92e.js.map": "/creditmindV2/static/js/main.a5faa92e.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.e1bf785f.css",
+    "static/js/main.a5faa92e.js"
+  ]
+}
