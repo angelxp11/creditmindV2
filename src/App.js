@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import {
   onAuthStateChanged,
   signOut,
-  getRedirectResult
 } from "firebase/auth";
 
 import { auth } from "./server/api";
@@ -41,29 +40,16 @@ function App() {
   useEffect(() => {
   console.log("App montada");
 
-  // Procesa el retorno de signInWithRedirect
-  getRedirectResult(auth)
-    .then((result) => {
-      if (result?.user) {
-        console.log("REDIRECT OK:", result.user);
-
-        setAuthDebug(
-          `REDIRECT OK | ${result.user.email} | UID: ${result.user.uid}`
-        );
-
-        setUser(result.user);
-        setCheckingAuth(false);
-      }
-    })
-    .catch((error) => {
-      console.error("REDIRECT ERROR:", error);
-
-      setAuthDebug(
-        `REDIRECT ERROR: ${error.code || error.message}`
-      );
-    });
-
   const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+    console.log("CURRENT USER:", auth.currentUser);
+console.log("LOCAL STORAGE ITEMS:", localStorage.length);
+
+for (let i = 0; i < localStorage.length; i++) {
+  console.log(
+    localStorage.key(i),
+    localStorage.getItem(localStorage.key(i))
+  );
+}
     console.log("onAuthStateChanged =>", currentUser);
 
     if (currentUser) {

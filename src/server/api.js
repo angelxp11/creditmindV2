@@ -1,16 +1,18 @@
-
 // Import Firebase core
 import { initializeApp } from "firebase/app";
 
-// Analytics (opcional)
+// Analytics
 import { getAnalytics } from "firebase/analytics";
 
 // 🔥 AUTH
-import { getAuth } from "firebase/auth";
+import {
+  getAuth,
+  setPersistence,
+  browserLocalPersistence
+} from "firebase/auth";
 
 // 🔥 FIRESTORE
 import { getFirestore } from "firebase/firestore";
-
 
 const firebaseConfig = {
   apiKey: "AIzaSyC2FhFI0sXYy-lAC_G42B6Dh6fVh6gfCm8",
@@ -22,19 +24,28 @@ const firebaseConfig = {
   measurementId: "G-ZTNJ75ZWYN"
 };
 
-
 // Inicializar Firebase
 const app = initializeApp(firebaseConfig);
 
 // Servicios
 const auth = getAuth(app);
+
+// Forzar persistencia local
+setPersistence(auth, browserLocalPersistence)
+  .then(() => {
+    console.log("✅ Persistencia LOCAL activada");
+  })
+  .catch((error) => {
+    console.error("❌ Error persistencia:", error);
+  });
+
 const db = getFirestore(app);
 
-// Analytics (solo funciona en navegador)
+// Analytics (solo navegador)
 let analytics;
 if (typeof window !== "undefined") {
   analytics = getAnalytics(app);
 }
 
-// Exportar para usar en el proyecto
+// Exportar
 export { auth, db, analytics };

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import {
   signInWithEmailAndPassword,
-  signInWithRedirect,
+  signInWithPopup,
   GoogleAuthProvider
 } from "firebase/auth";
 
@@ -36,19 +36,24 @@ const Login = () => {
     return Timestamp.fromDate(date);
   };
 
-  const handleGoogleSignIn = async () => {
+ const handleGoogleSignIn = async () => {
   setLoading(true);
   setError("");
 
   try {
+    console.log("ANTES DEL POPUP");
+
     const provider = new GoogleAuthProvider();
 
-    await signInWithRedirect(auth, provider);
+    const result = await signInWithPopup(auth, provider);
 
+    console.log("LOGIN OK", result.user);
+    console.log("AUTH CURRENT", auth.currentUser);
+
+    showToast("¡Sesión iniciada correctamente!", "success");
   } catch (err) {
-    console.error("Error en login con Google:", err);
-    setError(err.message);
-    showToast("Error al iniciar sesión con Google", "error");
+    console.error("ERROR GOOGLE", err);
+  } finally {
     setLoading(false);
   }
 };
