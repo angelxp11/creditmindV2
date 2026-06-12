@@ -1,9 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  onAuthStateChanged,
-  signOut,
-  getRedirectResult
-} from "firebase/auth";
+import { onAuthStateChanged, signOut } from "firebase/auth";
 
 import { auth } from "./server/api";
 
@@ -24,6 +20,7 @@ import ConfirmModal from "./resources/modalquestion/modalquestion";
 function App() {
   const [user, setUser] = useState(null);
   const [checkingAuth, setCheckingAuth] = useState(true);
+  const [authDebug, setAuthDebug] = useState("INICIANDO");
 
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [showCuentas, setShowCuentas] = useState(false);
@@ -38,22 +35,18 @@ function App() {
   });
 
   useEffect(() => {
-    const checkRedirect = async () => {
-      try {
-        const result = await getRedirectResult(auth);
-
-        if (result?.user) {
-          console.log("Usuario autenticado por redirect:", result.user);
-        }
-      } catch (error) {
-        console.error("Error getRedirectResult:", error);
-      }
-    };
-
-    checkRedirect();
+    console.log("App montada");
 
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      console.log("Firebase User:", currentUser);
+      console.log("onAuthStateChanged =>", currentUser);
+
+      if (currentUser) {
+        setAuthDebug(
+          `LOGUEADO | ${currentUser.email} | UID: ${currentUser.uid}`
+        );
+      } else {
+        setAuthDebug("SIN SESION");
+      }
 
       setUser(currentUser);
       setCheckingAuth(false);
@@ -62,12 +55,16 @@ function App() {
     return () => unsubscribe();
   }, []);
 
+  useEffect(() => {
+    console.log("USER STATE =>", user);
+  }, [user]);
+
   const handleLogout = async () => {
     try {
       await signOut(auth);
       setShowLogoutModal(false);
     } catch (error) {
-      console.error("Error al cerrar sesión:", error);
+      console.error(error);
     }
   };
 
@@ -82,6 +79,30 @@ function App() {
 
   return (
     <>
+      {/* DEBUG */}
+      <div
+        style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          right: 0,
+          background: "#ff0000",
+          color: "#fff",
+          zIndex: 999999,
+          padding: "8px",
+          fontSize: "11px",
+          wordBreak: "break-word",
+        }}
+      >
+        {authDebug}
+        <br />
+        auth.currentUser:
+        {auth.currentUser ? auth.currentUser.email : "NULL"}
+        <br />
+        render:
+        {user ? "HOME" : "LOGIN"}
+      </div>
+
       <ToastContainer />
 
       {user ? (
