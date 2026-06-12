@@ -1,5 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { onAuthStateChanged, signOut } from "firebase/auth";
+import {
+  onAuthStateChanged,
+  signOut,
+  getRedirectResult
+} from "firebase/auth";
 
 import { auth } from "./server/api";
 
@@ -35,25 +39,47 @@ function App() {
   });
 
   useEffect(() => {
-    console.log("App montada");
+  console.log("App montada");
 
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      console.log("onAuthStateChanged =>", currentUser);
+  // Procesa el retorno de signInWithRedirect
+  getRedirectResult(auth)
+    .then((result) => {
+      if (result?.user) {
+        console.log("REDIRECT OK:", result.user);
 
-      if (currentUser) {
         setAuthDebug(
-          `LOGUEADO | ${currentUser.email} | UID: ${currentUser.uid}`
+          `REDIRECT OK | ${result.user.email} | UID: ${result.user.uid}`
         );
-      } else {
-        setAuthDebug("SIN SESION");
-      }
 
-      setUser(currentUser);
-      setCheckingAuth(false);
+        setUser(result.user);
+        setCheckingAuth(false);
+      }
+    })
+    .catch((error) => {
+      console.error("REDIRECT ERROR:", error);
+
+      setAuthDebug(
+        `REDIRECT ERROR: ${error.code || error.message}`
+      );
     });
 
-    return () => unsubscribe();
-  }, []);
+  const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+    console.log("onAuthStateChanged =>", currentUser);
+
+    if (currentUser) {
+      setAuthDebug(
+        `LOGUEADO | ${currentUser.email} | UID: ${currentUser.uid}`
+      );
+    } else {
+      setAuthDebug("SIN SESION");
+    }
+
+    setUser(currentUser);
+    setCheckingAuth(false);
+  });
+
+  return () => unsubscribe();
+}, []);
 
   useEffect(() => {
     console.log("USER STATE =>", user);

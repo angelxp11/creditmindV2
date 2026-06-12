@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import {
   signInWithEmailAndPassword,
-  signInWithPopup,
+  signInWithRedirect,
   GoogleAuthProvider
 } from "firebase/auth";
 
@@ -41,8 +41,11 @@ const Login = () => {
     setError("");
     try {
       const provider = new GoogleAuthProvider();
-      const result = await signInWithPopup(auth, provider);
-      const user = result.user;
+      const provider = new GoogleAuthProvider();
+
+await signInWithRedirect(auth, provider);
+
+return;
 
       // Referencia al documento en la colección "usuarios"
       const userDocRef = doc(db, "usuarios", user.uid);
