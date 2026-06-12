@@ -38,45 +38,91 @@ function App() {
   });
 
   useEffect(() => {
-  console.log("App montada");
+    console.log("App montada");
+    console.log("🔍 Verificando sesión guardada...");
 
-  const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-    console.log("CURRENT USER:", auth.currentUser);
-console.log("LOCAL STORAGE ITEMS:", localStorage.length);
+    // Variable para rastrear si el callback fue llamado
+    let authCheckCompleted = false;
+    let timeoutId = null;
 
-for (let i = 0; i < localStorage.length; i++) {
-  console.log(
-    localStorage.key(i),
-    localStorage.getItem(localStorage.key(i))
-  );
-}
-    console.log("onAuthStateChanged =>", currentUser);
+    const unsubscribe = onAuthStateChanged(
+      auth,
+      (currentUser) => {
+        authCheckCompleted = true;
+        
+        console.log("✅ onAuthStateChanged callback ejecutado");
+        console.log("CURRENT USER:", auth.currentUser);
+        
+        // Debug: mostrar localStorage items
+        console.log("LOCAL STORAGE ITEMS:", localStorage.length);
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          const value = localStorage.getItem(key);
+          console.log(`  [${key}]:`, value ? value.substring(0, 50) + "..." : "empty");
+        }
 
-    if (currentUser) {
-      setAuthDebug(
-        `LOGUEADO | ${currentUser.email} | UID: ${currentUser.uid}`
-      );
-    } else {
-      setAuthDebug("SIN SESION");
-    }
+        // Debug: mostrar IndexedDB info
+        if (indexedDB) {
+          indexedDB.databases().then((dbs) => {
+            console.log("📦 IndexedDB databases:", dbs.map(db => db.name));
+          });
+        }
 
-    setUser(currentUser);
-    setCheckingAuth(false);
-  });
+        console.log("onAuthStateChanged =>", currentUser);
 
-  return () => unsubscribe();
-}, []);
+        if (currentUser) {
+          setAuthDebug(
+            `✅ LOGUEADO | ${currentUser.email} | UID: ${currentUser.uid}`
+          );
+          console.log("🟢 Usuario autenticado:", currentUser.email);
+        } else {
+          setAuthDebug("⚠️ SIN SESION");
+          console.log("🔴 No hay usuario autenticado");
+        }
+
+        setUser(currentUser);
+        setCheckingAuth(false);
+        
+        // Limpiar timeout si existe
+        if (timeoutId) {
+          clearTimeout(timeoutId);
+        }
+      },
+      (error) => {
+        console.error("❌ Error en onAuthStateChanged:", error);
+        setAuthDebug(`ERROR: ${error.message}`);
+        setCheckingAuth(false);
+      }
+    );
+
+    // Fallback timeout: si Auth no responde en 3 segundos, continuar de todas formas
+    timeoutId = setTimeout(() => {
+      if (!authCheckCompleted) {
+        console.warn("⚠️ Auth check timeout - continuando sin esperar más");
+        setCheckingAuth(false);
+      }
+    }, 3000);
+
+    return () => {
+      unsubscribe();
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    };
+  }, []);
 
   useEffect(() => {
-    console.log("USER STATE =>", user);
+    console.log("USER STATE ACTUALIZADO =>", user);
   }, [user]);
 
   const handleLogout = async () => {
     try {
+      console.log("🔓 Cerrando sesión...");
       await signOut(auth);
+      console.log("✅ Sesión cerrada correctamente");
       setShowLogoutModal(false);
     } catch (error) {
-      console.error(error);
+      console.error("❌ Error al cerrar sesión:", error);
     }
   };
 
@@ -91,28 +137,27 @@ for (let i = 0; i < localStorage.length; i++) {
 
   return (
     <>
-      {/* DEBUG */}
+      {/* DEBUG PANEL */}
       <div
         style={{
           position: "fixed",
           top: 0,
           left: 0,
           right: 0,
-          background: "#ff0000",
+          background: user ? "#22c55e" : "#ef4444",
           color: "#fff",
           zIndex: 999999,
           padding: "8px",
           fontSize: "11px",
           wordBreak: "break-word",
+          fontFamily: "monospace",
         }}
       >
-        {authDebug}
+        <strong>STATUS:</strong> {authDebug}
         <br />
-        auth.currentUser:
-        {auth.currentUser ? auth.currentUser.email : "NULL"}
+        <strong>auth.currentUser:</strong> {auth.currentUser ? auth.currentUser.email : "NULL"}
         <br />
-        render:
-        {user ? "HOME" : "LOGIN"}
+        <strong>RENDER:</strong> {user ? "🟢 HOME" : "🔴 LOGIN"}
       </div>
 
       <ToastContainer />

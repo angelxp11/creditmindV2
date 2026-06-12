@@ -8,6 +8,7 @@ import { getAnalytics } from "firebase/analytics";
 import {
   getAuth,
   setPersistence,
+  indexedDBLocalPersistence,
   browserLocalPersistence
 } from "firebase/auth";
 
@@ -30,13 +31,20 @@ const app = initializeApp(firebaseConfig);
 // Servicios
 const auth = getAuth(app);
 
-// Forzar persistencia local
-setPersistence(auth, browserLocalPersistence)
+// 🔧 PERSISTENCIA CON FALLBACK (IndexedDB primero, luego localStorage)
+setPersistence(auth, indexedDBLocalPersistence)
   .then(() => {
-    console.log("✅ Persistencia LOCAL activada");
+    console.log("✅ Persistencia IndexedDB activada (iOS PWA compatible)");
   })
-  .catch((error) => {
-    console.error("❌ Error persistencia:", error);
+  .catch(() => {
+    // Si IndexedDB falla, usa localStorage
+    return setPersistence(auth, browserLocalPersistence)
+      .then(() => {
+        console.log("✅ Persistencia localStorage activada (fallback)");
+      })
+      .catch((error) => {
+        console.error("❌ Error configurando persistencia:", error);
+      });
   });
 
 const db = getFirestore(app);
