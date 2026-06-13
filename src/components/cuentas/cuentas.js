@@ -66,60 +66,44 @@ const Cuentas = ({ isOpen, onClose }) => {
     fetchAccounts();
   }, [isOpen]);
 
-  const formatNumber = (value) => {
-    const num = Number(value);
-    const abs = String(Math.abs(num)).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-    return num < 0 ? `-${abs}` : abs;
-  };
+  
 
   const handleChange = (event) => {
-    const { name, value } = event.target;
-    if (name === "saldo") {
-      setFormValues((prev) => ({
-        ...prev,
-        saldo: value ? formatNumber(value) : "",
-      }));
-      return;
-    }
+  const { name, value } = event.target;
+
+  if (name === "saldo") {
+    const soloNumeros = value.replace(/\D/g, "");
+
+    const formateado = soloNumeros.replace(
+      /\B(?=(\d{3})+(?!\d))/g,
+      "."
+    );
 
     setFormValues((prev) => ({
       ...prev,
-      [name]: value,
+      saldo: formateado,
     }));
-  };
 
-  const handleSaldoKeyDown = (event) => {
-    const allowedKeys = [
-      "Backspace",
-      "ArrowLeft",
-      "ArrowRight",
-      "ArrowUp",
-      "ArrowDown",
-      "Delete",
-      "Tab",
-    ];
+    return;
+  }
 
-    if (allowedKeys.includes(event.key)) {
-      return;
-    }
+  setFormValues((prev) => ({
+    ...prev,
+    [name]: value,
+  }));
+};
 
-    if (!/^\d$/.test(event.key)) {
-      event.preventDefault();
-    }
-  };
+  
 
-  const handleSaldoPaste = (event) => {
-    const paste = event.clipboardData.getData("text");
-    if (!/^\d+$/.test(paste.replace(/\./g, ""))) {
-      event.preventDefault();
-    }
-  };
+  
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     const banco = formValues.banco.trim();
     const nombre = formValues.nombre.trim();
-    const saldo = Number(formValues.saldo.replace(/\./g, ""));
+    const saldo = Number(
+  (formValues.saldo || "").replace(/\./g, "")
+);
     const user = auth.currentUser;
 
     if (!user) {
@@ -188,10 +172,10 @@ const Cuentas = ({ isOpen, onClose }) => {
   const handleEdit = (account) => {
     setEditingId(account.id);
     setFormValues({
-      banco: account.banco,
-      nombre: account.nombre,
-      saldo: formatNumber(account.saldo.toString()),
-    });
+  banco: account.banco,
+  nombre: account.nombre,
+  saldo: Number(account.saldo || 0).toLocaleString("es-CO"),
+});
   };
 
   if (!isOpen) {
@@ -240,16 +224,14 @@ const Cuentas = ({ isOpen, onClose }) => {
           <div className="form-group">
             <label htmlFor="saldo">Saldo</label>
             <input
-              id="saldo"
-              name="saldo"
-              type="text"
-              inputMode="numeric"
-              value={formValues.saldo}
-              onChange={handleChange}
-              onKeyDown={handleSaldoKeyDown}
-              onPaste={handleSaldoPaste}
-              placeholder="0"
-            />
+  id="saldo"
+  name="saldo"
+  type="text"
+  inputMode="numeric"
+  value={formValues.saldo}
+  onChange={handleChange}
+  placeholder="0"
+/>
           </div>
 
           <button className="cuentas-submit" type="submit">
@@ -277,7 +259,7 @@ const Cuentas = ({ isOpen, onClose }) => {
                     
                     <td>{account.banco}</td>
                     <td>{account.nombre}</td>
-                    <td>${formatNumber(account.saldo.toString())}</td>
+                    <td>${Number(account.saldo || 0).toLocaleString("es-CO")}</td>
                     <td>
                       <button
                         className="cuentas-edit"
