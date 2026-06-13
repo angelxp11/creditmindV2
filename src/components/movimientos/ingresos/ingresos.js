@@ -56,20 +56,32 @@ const Ingresos = ({ isOpen, onClose }) => {
     }
   }, [isOpen]);
 
-  const formatMoneyInput = (value) => {
-    const num = Number(value);
-    const abs = String(Math.abs(num)).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-    return num < 0 ? `-${abs}` : abs;
-  };
+  
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    if (name === "valor") {
-      setFormValues((prev) => ({ ...prev, valor: value ? formatMoneyInput(value) : "" }));
-      return;
-    }
-    setFormValues((prev) => ({ ...prev, [name]: value }));
-  };
+  const { name, value } = e.target;
+
+  if (name === "valor") {
+    const soloNumeros = value.replace(/\D/g, "");
+
+    const formateado = soloNumeros.replace(
+      /\B(?=(\d{3})+(?!\d))/g,
+      "."
+    );
+
+    setFormValues((prev) => ({
+      ...prev,
+      valor: formateado,
+    }));
+
+    return;
+  }
+
+  setFormValues((prev) => ({
+    ...prev,
+    [name]: value,
+  }));
+};
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -141,8 +153,8 @@ const Ingresos = ({ isOpen, onClose }) => {
               <option value="">Selecciona una cuenta</option>
               {accounts.map((c) => (
                 <option key={c.id} value={c.id}>
-                  {c.banco} – {c.nombre} (${formatMoneyInput(String(c.saldo || 0))})
-                </option>
+  {c.banco} – {c.nombre} (${Number(c.saldo || 0).toLocaleString("es-CO")})
+</option>
               ))}
             </select>
           </div>

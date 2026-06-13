@@ -1,7 +1,7 @@
 {
-  "short_name": "creditmind creditmind",
-  "name": "creditmind",
-  "description": "ccreditmind.",
+  "short_name": "CreditMind",
+  "name": "CreditMind - Gestión Financiera",
+  "description": "Gestiona tus finanzas personales, cuentas bancarias, deudas y presupuesto de forma inteligente y segura.",
 
   "icons": [
     {
@@ -36,9 +36,50 @@
   "dir": "ltr",
 
   "categories": [
-    "sports",
-    "games",
-    "entertainment",
+    "finance",
+    "productivity",
     "utilities"
+  ],
+
+  "screenshots": [
+    {
+      "src": "screenshot-mobile.png",
+      "sizes": "540x720",
+      "type": "image/png",
+      "form_factor": "narrow"
+    },
+    {
+      "src": "screenshot-desktop.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide"
+    }
+  ],
+
+  "shortcuts": [
+    {
+      "name": "Ver deudas",
+      "short_name": "Deudas",
+      "description": "Acceso rápido a la gestión de deudas",
+      "url": "/deudas",
+      "icons": [
+        {
+          "src": "icon-deudas.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Ver movimientos",
+      "short_name": "Movimientos",
+      "description": "Acceso rápido a los movimientos de cuentas",
+      "url": "/movimientos",
+      "icons": [
+        {
+          "src": "icon-movimientos.png",
+          "sizes": "96x96"
+        }
+      ]
+    }
   ]
 }

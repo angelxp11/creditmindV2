@@ -29,6 +29,7 @@ const Deudas = ({ isOpen, onClose }) => {
   const [editingId, setEditingId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [viewMode, setViewMode] = useState("view"); // "create" | "view"
+  const [filterMode, setFilterMode] = useState("proximaPago"); // "proximaPago" | "mayorMenor"
   const [paymentModal, setPaymentModal] = useState({
     isOpen: false,
     deudaId: null,
@@ -101,6 +102,24 @@ const Deudas = ({ isOpen, onClose }) => {
   };
 
   const isPagada = (deuda) => (deuda.montoRestante ?? deuda.monto) <= 0;
+
+  const getFilteredDeudas = () => {
+    const pendientes = deudas.filter((d) => !isPagada(d));
+    const pagadas = deudas.filter((d) => isPagada(d));
+
+    let deudasOrdenadas = pendientes;
+    if (filterMode === "mayorMenor") {
+      deudasOrdenadas = pendientes.sort((a, b) => b.monto - a.monto);
+    } else if (filterMode === "proximaPago") {
+      deudasOrdenadas = pendientes.sort((a, b) => {
+        const fechaA = a.proximaFechaPago?.toDate?.() ?? new Date(a.proximaFechaPago);
+        const fechaB = b.proximaFechaPago?.toDate?.() ?? new Date(b.proximaFechaPago);
+        return fechaA - fechaB;
+      });
+    }
+
+    return [...deudasOrdenadas, ...pagadas];
+  };
 
   /* ── Form handlers ── */
   const handleChange = (e) => {
@@ -400,7 +419,25 @@ const Deudas = ({ isOpen, onClose }) => {
         {/* LISTA */}
         {viewMode === "view" && (
           <div className="deudas-list">
-            <h3>Mis deudas</h3>
+            <div className="deudas-filter-buttons">
+              <h3>Mis deudas</h3>
+              <div className="deudas-filter-buttons-group">
+                <button
+                  type="button"
+                  onClick={() => setFilterMode("proximaPago")}
+                  className={`deudas-filter-btn${filterMode === "proximaPago" ? " deudas-filter-btn--active" : ""}`}
+                >
+                  Próxima a pagar
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setFilterMode("mayorMenor")}
+                  className={`deudas-filter-btn${filterMode === "mayorMenor" ? " deudas-filter-btn--active" : ""}`}
+                >
+                  Mayor a menor
+                </button>
+              </div>
+            </div>
             {deudas.length === 0 ? (
               <p>No hay deudas registradas aún.</p>
             ) : (
@@ -417,7 +454,7 @@ const Deudas = ({ isOpen, onClose }) => {
                   </tr>
                 </thead>
                 <tbody>
-                  {deudas.map((deuda) => {
+                  {getFilteredDeudas().map((deuda) => {
                     const pct = getProgressPercentage(deuda);
                     const pagada = isPagada(deuda);
                     return (

@@ -236,6 +236,12 @@ body.dark-theme {
   white-space: nowrap;
 }
 
+.ver-table td:nth-child(5) {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: unset;
+}
+
 /* Anchos de columnas */
 .ver-table th:nth-child(1),
 .ver-table td:nth-child(1) {
@@ -336,12 +342,41 @@ body.dark-theme {
     padding: 1rem;
   }
 
-  /* Ocultar columnas Tipo y Tags en móvil */
+  /* Scroll horizontal en tabla móvil */
+  .ver-list {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    width: 100%;
+  }
+
+  .ver-table {
+    width: 100%;
+    min-width: 600px;
+  }
+
+  .ver-table th:nth-child(1),
+  .ver-table td:nth-child(1) {
+    width: 130px;
+  }
+
+  .ver-table th:nth-child(2),
+  .ver-table td:nth-child(2) {
+    width: 100px;
+  }
+
+  .ver-table th:nth-child(3),
+  .ver-table td:nth-child(3) {
+    width: 120px;
+  }
+
   .ver-table th:nth-child(4),
-  .ver-table td:nth-child(4),
+  .ver-table td:nth-child(4) {
+    width: 100px;
+  }
+
   .ver-table th:nth-child(5),
   .ver-table td:nth-child(5) {
-    display: none;
+    width: 150px;
   }
 
   .ver-table th,

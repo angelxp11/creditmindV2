@@ -21,8 +21,6 @@ function App() {
   const [user, setUser] = useState(null);
   const [checkingAuth, setCheckingAuth] = useState(true);
 
-  const [authDebug, setAuthDebug] = useState("Verificando...");
-
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [showCuentas, setShowCuentas] = useState(false);
   const [showDeudas, setShowDeudas] = useState(false);
@@ -37,14 +35,6 @@ function App() {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      console.log("Firebase User:", currentUser);
-
-      if (currentUser) {
-        setAuthDebug(`LOGUEADO: ${currentUser.email}`);
-      } else {
-        setAuthDebug("SIN SESION");
-      }
-
       setUser(currentUser);
       setCheckingAuth(false);
     });
@@ -57,7 +47,7 @@ function App() {
       await signOut(auth);
       setShowLogoutModal(false);
     } catch (error) {
-      console.error("Error al cerrar sesión:", error);
+      console.error(error);
     }
   };
 
@@ -65,23 +55,6 @@ function App() {
     return (
       <>
         <ToastContainer />
-
-        <div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100%",
-            background: "red",
-            color: "white",
-            padding: "8px",
-            zIndex: 99999,
-            fontSize: "12px",
-          }}
-        >
-          {authDebug}
-        </div>
-
         <Loading message="Verificando sesión..." />
       </>
     );
@@ -90,22 +63,6 @@ function App() {
   return (
     <>
       <ToastContainer />
-
-      <div
-        style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          width: "100%",
-          background: "red",
-          color: "white",
-          padding: "8px",
-          zIndex: 99999,
-          fontSize: "12px",
-        }}
-      >
-        {authDebug}
-      </div>
 
       {user ? (
         <>
@@ -186,7 +143,8 @@ function App() {
           {!showCuentas &&
             !showDeudas &&
             !showMovimientos &&
-            !showVerMovimientos && <Home />}
+            !showVerMovimientos &&
+            !showIngresos && <Home />}
 
           <PQR />
 
